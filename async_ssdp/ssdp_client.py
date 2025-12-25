@@ -9,13 +9,7 @@ class SSDPClient:
     """Client that discovers and tracks devices"""
     
     def __init__(self, **kwargs):
-        # Client doesn't need device/uuid/location for discovery-only
-        self.service = SSDPService(
-            device="client", 
-            uuid=str(uuid.uuid4()), 
-            location="", 
-            **kwargs
-        )
+        self.service = SSDPService(**kwargs)
         self.registry = DeviceRegistry()
     
     async def discover(self, target: str = "ssdp:all", timeout: int = 5):

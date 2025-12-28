@@ -16,7 +16,8 @@ class SSDPService:
                  location: str,
                  cache: int = 1800,
                  json_upnp: bool = False,
-                 multicast_group: str = '239.255.255.250',
+                 multicast_group: str = '224.0.0.251',
+                #  multicast_group: str = '239.255.255.250',
                  multicast_port: int = 1900):
         
         schema = "urn:schemas-json-upnp-org" if json_upnp else "urn:schemas-upnp-org"

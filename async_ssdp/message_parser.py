@@ -42,7 +42,7 @@ class MessageParser:
                     key, value = line.split(':', 1)
                     headers[key.strip()] = value.strip()
             
-            return ParsedMessage(message_type, headers, status_code)
+            return ParsedMessage(text, message_type, headers, status_code)
             
         except UnicodeDecodeError:
             print("Failed to decode message as UTF-8")

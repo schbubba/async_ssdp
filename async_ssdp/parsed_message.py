@@ -11,7 +11,8 @@ class ParsedMessageType(Enum):
 class ParsedMessage:
     """Represents a parsed multicast message"""
     
-    def __init__(self, message_type: ParsedMessageType, headers: Dict[str, str], status_code: Optional[int] = None):
+    def __init__(self, text: str, message_type: ParsedMessageType, headers: Dict[str, str], status_code: Optional[int] = None):
+        self.text = text
         self.message_type = message_type
         self.headers = headers
         self.status_code = status_code
@@ -72,3 +73,9 @@ class ParsedMessage:
             except (ValueError, IndexError):
                 return None
         return None
+    
+    def __str__(self):
+        return self.text
+    
+    def __repr__(self):
+        return self.text

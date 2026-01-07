@@ -1,5 +1,7 @@
 from enum import Enum
 from typing import Dict, Optional
+import aiofiles
+from pathlib import Path
 
 class ParsedMessageType(Enum):
     NOTIFY = "NOTIFY"
@@ -25,6 +27,22 @@ class ParsedMessage:
                 return v
         return default
     
+    async def save_txt_file(self, path):
+        self._ensure_directory(path)
+        async with aiofiles.open(path, 'w', encoding="utf-8") as file:
+            await file.write(str(self))
+
+    def _ensure_directory(self, path):
+        p = Path(path)
+
+        # If the path has a suffix, treat it as a file path
+        if p.suffix:
+            dir_path = p.parent
+        else:
+            dir_path = p
+
+        dir_path.mkdir(parents=True, exist_ok=True)
+
     def is_notification(self) -> bool:
         return self.message_type == ParsedMessageType.NOTIFY
     

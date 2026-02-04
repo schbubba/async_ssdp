@@ -42,8 +42,18 @@ class MulticastTransport:
         
         def _send():
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-            ttl = struct.pack("b", 1)
-            sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
+
+            # SSDP requirements
+            sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
+            sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
+
+            # Windows needs this or packets may vanish
+            sock.setsockopt(
+                socket.IPPROTO_IP,
+                socket.IP_MULTICAST_IF,
+                socket.inet_aton("0.0.0.0")
+            )
+
             sock.sendto(message.encode("utf-8"), (self.multicast_group, self.multicast_port))
             sock.close()
         
@@ -67,11 +77,18 @@ class MulticastTransport:
         
         sock.bind(("", self.multicast_port))
         
-        mreq = struct.pack("4sl", 
-                          socket.inet_aton(self.multicast_group),
-                          socket.INADDR_ANY)
+        iface_ip = self.get_primary_ipv4()
+        print(f"Joining multicast group {self.multicast_group} on interface {iface_ip}")
+        mreq = struct.pack(
+            "4s4s",
+            socket.inet_aton(self.multicast_group),
+            socket.inet_aton(iface_ip)
+        )
+
         sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         
+        sock.setblocking(False)
+
         self.listener_transport, _ = await loop.create_datagram_endpoint(
             lambda: AsyncMulticastProtocol(on_datagram),
             sock=sock
@@ -82,3 +99,11 @@ class MulticastTransport:
         if self.listener_transport:
             self.listener_transport.close()
             self.listener_transport = None
+
+    def get_primary_ipv4(self) -> str:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(("8.8.8.8", 80))
+            return s.getsockname()[0]
+        finally:
+            s.close()

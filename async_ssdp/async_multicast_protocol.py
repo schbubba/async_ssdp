@@ -31,7 +31,8 @@ class AsyncMulticastProtocol(asyncio.DatagramProtocol):
 class MulticastTransport:
     """Handles multicast socket operations"""
     
-    def __init__(self, multicast_group: str, multicast_port: int):
+    def __init__(self, multicast_interface: str, multicast_group: str, multicast_port: int):
+        self.multicast_interface = multicast_interface
         self.multicast_group = multicast_group
         self.multicast_port = multicast_port
         self.listener_transport = None
@@ -51,7 +52,7 @@ class MulticastTransport:
             sock.setsockopt(
                 socket.IPPROTO_IP,
                 socket.IP_MULTICAST_IF,
-                socket.inet_aton("0.0.0.0")
+                socket.inet_aton(self.multicast_interface)
             )
 
             sock.sendto(message.encode("utf-8"), (self.multicast_group, self.multicast_port))

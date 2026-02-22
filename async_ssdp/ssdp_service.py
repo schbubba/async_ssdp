@@ -16,6 +16,7 @@ class SSDPService:
                  location: str,
                  cache: int = 1800,
                  json_upnp: bool = False,
+                 multicast_interface: str = "0.0.0.0",
                  multicast_group: str = '239.255.255.250',
                  multicast_port: int = 1900):
         
@@ -25,7 +26,7 @@ class SSDPService:
             device, uuid, location, schema, 
             multicast_group, multicast_port, cache
         )
-        self.transport = MulticastTransport(multicast_group, multicast_port)
+        self.transport = MulticastTransport(multicast_interface, multicast_group, multicast_port)
         self.event_bus = EventBus()
         self.parser = MessageParser()
         self._is_listening = False
